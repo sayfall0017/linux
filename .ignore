@@ -1,0 +1,11 @@
+语言编译产物
+*.o
+*.out
+*.exe
+process
+process.exe
+
+# 临时文件
+*~
+*.swp
+*.swo
