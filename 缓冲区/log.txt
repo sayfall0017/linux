@@ -1,4 +1,7 @@
-hello cout
-hello stdout
-hello cerr
-hello stderr
+hello write
+hello printf
+hello fprintf
+hello fwrite
+hello printf
+hello fprintf
+hello fwrite
