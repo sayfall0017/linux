@@ -84,4 +84,80 @@ namespace LogModule
         std::string _file;
         Mutex _mutex;
     };
+
+    enum class LogLevel
+    {
+        DEBUG,
+        INFO,
+        WARNING,
+        ERROR,
+        FATAL
+    };
+
+    std::string LeveltoStr(LogLevel level)
+    {
+        switch (level)
+        {
+        case LogLevel::DEBUG:
+            return "DEBUG";
+        case LogLevel::INFO:
+            return "INFO";
+        case LogLevel::WARNING:
+            return "WARNING";
+        case LogLevel::ERROR:
+            return "ERROR";
+        case LogLevel::FATAL:
+            return "FATAL";
+        default:
+            return "UNKNOWN";
+        }
+    }
+
+    std::string GetTimeStamp()
+    {
+        time_t curr = time(nullptr);
+        struct tm curr_tm;
+        localtime_r(&curr, &curr_tm);
+
+        char timebuffer[128];
+        snprintf(timebuffer, sizeof(timebuffer), "%4d-%2d-%2d  %2d:%2d:%2d", curr_tm.tm_year + 1990, curr_tm.tm_mon + 1, curr_tm.tm_mday, curr_tm.tm_hour, curr_tm.tm_min, curr_tm.tm_sec);
+
+        return timebuffer;
+    }
+
+    class Logger
+    {
+    public:
+        Logger()
+        {
+            EnableConsoleStrategy();
+        }
+        void EnableFileStrategy()
+        {
+            _fflush_strategy = std::make_unique<FileLogStrategy>();
+        }
+        void EnableConsoleStrategy()
+        {
+            _fflush_strategy = std::make_unique<ConsoleLogStrategy>();
+        }
+
+        class Logmessage
+        {
+        public:
+                private:
+            LogLevel _level;
+            std::string _curr_time;
+            pid_t _pid;
+            std::string _src_name;
+            int _line_number;
+            std::string _loginfo; // 合并之后，一条完整的信息
+            Logger &_logger;
+        };
+
+    private:
+        std::unique_ptr<LogStrategy> _fflush_strategy;
+    };
+
+    Logger logger;
+
 }

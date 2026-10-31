@@ -39,17 +39,17 @@ namespace MutexModule
 
     class LockGuard
     {
-        public:
-            LockGuard(Mutex &mutex):_mutex(mutex)
-            {
-                _mutex.Lock();
-            }
-            ~LockGuard()
-            {
-                _mutex.Unlock();
-            }
+    public:
+        LockGuard(Mutex &mutex) : _mutex(mutex)
+        {
+            _mutex.Lock();
+        }
+        ~LockGuard()
+        {
+            _mutex.Unlock();
+        }
 
-        private:
-            Mutex &_mutex; // 传的是引用 → 守卫操作的就是同一把锁
+    private:
+        Mutex &_mutex; // 传的是引用 → 守卫操作的就是同一把锁
     };
 }
