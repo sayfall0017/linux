@@ -5,6 +5,9 @@
 #include <filesystem>
 #include <sstream>
 #include <fstream>
+#include <memory>
+#include <unistd.h>
+#include <ctime>
 #include "Mutex.hpp"
 
 namespace LogModule
@@ -85,6 +88,7 @@ namespace LogModule
         Mutex _mutex;
     };
 
+    ///////////////////////////////////////////////////////////
     enum class LogLevel
     {
         DEBUG,
@@ -120,7 +124,14 @@ namespace LogModule
         localtime_r(&curr, &curr_tm);
 
         char timebuffer[128];
-        snprintf(timebuffer, sizeof(timebuffer), "%4d-%2d-%2d  %2d:%2d:%2d", curr_tm.tm_year + 1990, curr_tm.tm_mon + 1, curr_tm.tm_mday, curr_tm.tm_hour, curr_tm.tm_min, curr_tm.tm_sec);
+        snprintf(timebuffer, sizeof(timebuffer), "%4d-%2d-%2d  %2d:%2d:%2d"
+        , curr_tm.tm_year + 1990
+        , curr_tm.tm_mon + 1
+        , curr_tm.tm_mday
+        , curr_tm.tm_hour
+        , curr_tm.tm_min
+        , curr_tm.tm_sec
+    );
 
         return timebuffer;
     }
@@ -141,10 +152,45 @@ namespace LogModule
             _fflush_strategy = std::make_unique<ConsoleLogStrategy>();
         }
 
-        class Logmessage
+        class LogMessage
         {
         public:
-                private:
+            LogMessage(LogLevel &level, std::string src_name, int line_number)
+                : _level(level)
+                , _curr_time(GetTimeStamp())
+                ,_pid(getpid())
+                ,_src_name(src_name)
+                ,_line_number(line_number)
+                ,_logger(logger)
+            {
+                std::stringstream ss;
+                ss << "[" << _curr_time << "]"
+                   << "[" << LeveltoStr(level) << "]"
+                   << "[" << _pid << "]"
+                   << "[" << _src_name << "]"
+                   << "[" << _line_number << "]"
+                   << " - ";
+                _loginfo = ss.str();
+            }
+
+            template <typename T>
+            LogMessage &operator<<(const T &info)
+            {
+                std::stringstream ss;
+                ss << info;
+                _loginfo += ss.str();
+                return *this;
+            }
+
+            ~LogMessage()
+            {
+                if(_logger._fflush_strategy)
+                {
+                    _logger._fflush_strategy->SyncLog(_loginfo);
+                }
+            }
+
+        private:
             LogLevel _level;
             std::string _curr_time;
             pid_t _pid;
@@ -153,6 +199,15 @@ namespace LogModule
             std::string _loginfo; // 合并之后，一条完整的信息
             Logger &_logger;
         };
+
+        //
+        LogMessage operator()(LogLevel level, std::string name, int line)
+        {
+            return LogMessage(level, name, line, *this);
+        }
+        ~Logger()
+        {
+        }
 
     private:
         std::unique_ptr<LogStrategy> _fflush_strategy;
