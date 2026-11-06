@@ -124,14 +124,7 @@ namespace LogModule
         localtime_r(&curr, &curr_tm);
 
         char timebuffer[128];
-        snprintf(timebuffer, sizeof(timebuffer), "%4d-%2d-%2d  %2d:%2d:%2d"
-        , curr_tm.tm_year + 1990
-        , curr_tm.tm_mon + 1
-        , curr_tm.tm_mday
-        , curr_tm.tm_hour
-        , curr_tm.tm_min
-        , curr_tm.tm_sec
-    );
+        snprintf(timebuffer, sizeof(timebuffer), "%4d-%02d-%02d  %02d:%02d:%02d", curr_tm.tm_year + 1900, curr_tm.tm_mon + 1, curr_tm.tm_mday, curr_tm.tm_hour, curr_tm.tm_min, curr_tm.tm_sec);
 
         return timebuffer;
     }
@@ -155,13 +148,8 @@ namespace LogModule
         class LogMessage
         {
         public:
-            LogMessage(LogLevel &level, std::string src_name, int line_number)
-                : _level(level)
-                , _curr_time(GetTimeStamp())
-                ,_pid(getpid())
-                ,_src_name(src_name)
-                ,_line_number(line_number)
-                ,_logger(logger)
+            LogMessage(LogLevel &level, std::string src_name, int line_number, Logger &logger)
+                : _level(level), _curr_time(GetTimeStamp()), _pid(getpid()), _src_name(src_name), _line_number(line_number), _logger(logger)
             {
                 std::stringstream ss;
                 ss << "[" << _curr_time << "]"
@@ -184,7 +172,7 @@ namespace LogModule
 
             ~LogMessage()
             {
-                if(_logger._fflush_strategy)
+                if (_logger._fflush_strategy)
                 {
                     _logger._fflush_strategy->SyncLog(_loginfo);
                 }
@@ -213,6 +201,11 @@ namespace LogModule
         std::unique_ptr<LogStrategy> _fflush_strategy;
     };
 
+    // 全局日志对象
     Logger logger;
 
+// 使用宏，简化用户操作，获取文件名和行号
+#define LOG(level) logger(level, __FILE__, __LINE__)
+#define Enable_Console_Log_Strategy() logger.EnableConsoleStrategy()
+#define Enable_File_Log_Strategy() logger.EnableFileStrategy()
 }
