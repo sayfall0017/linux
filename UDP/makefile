@@ -1,10 +1,11 @@
-.PHONY:all clean
-all: updclient updserver
+.PHONY:all
+all: udpclient udpserver
 
-updclient : Updclient.cc
-	g++ -o @$ @^ -std=c++17
-updserver : Updserver.cc
-	g++ -o @$ @^ -std=c++17
+udpclient:Udpclient.cpp
+	g++ -o $@ $^ -std=c++17
+udpserver:Udpserver.cpp
+	g++ -o $@ $^ -std=c++17
 
+.PHONY:clean
 clean:
-	rm -f updclient updserver
+	rm -f udpclient udpserver
