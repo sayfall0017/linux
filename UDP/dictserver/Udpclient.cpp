@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 
     // 打开socket
     size_t sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd == 0)
+    if (sockfd < 0)
     {
         std::cout << "socket error" << std::endl;
         return 2;

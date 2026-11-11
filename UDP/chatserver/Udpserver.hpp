@@ -8,14 +8,18 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/un.h>
+#include <functional>
 #include "Log.hpp"
 
 using namespace LogModule;
+
+using func_t = std::function<std::string(const std::string&, sockaddr_in&)>;
+
 class UdpServer
 {
 public:
-    UdpServer(std::string ip, uint16_t port)
-        : _ip(ip), _port(port)
+    UdpServer(uint16_t port, func_t func)
+        : _port(port), _func(func)
     {
     }
     void Init()
@@ -36,7 +40,8 @@ public:
         struct sockaddr_in local;
         bzero(&local, sizeof(local));
         local.sin_port = htons(_port);
-        local.sin_addr.s_addr = inet_addr(_ip.c_str());//TODO
+        // local.sin_addr.s_addr = inet_addr(_ip.c_str());//TODO
+        local.sin_addr.s_addr = INADDR_ANY;
         local.sin_family = AF_INET;
 
         // bind
@@ -65,14 +70,23 @@ public:
                 LOG(LogLevel::FATAL) << "recvfrom fail";
                 exit(3);
             }
+
+
+
             uint16_t peer_port = ntohs(peer.sin_port);
             std::string peer_ip = inet_ntoa(peer.sin_addr);
             buffer[s] = 0;
-            LOG(LogLevel::DEBUG) << "[" << peer_ip << ":" << peer_port << "]" << buffer;
+
+
+            // LOG(LogLevel::DEBUG) << "[" << peer_ip << ":" << peer_port << "]" << buffer;
             // 发消息
-            std::string echo_string = "server echo@";
-            echo_string += buffer;
-            sendto(_sockfd, echo_string.c_str(), echo_string.size(), 0, (struct sockaddr *)&peer, len);
+            // std::string echo_string = "server echo@";
+            // echo_string += buffer;
+
+            // 添加函数对象让功能和网络服务器发送分开
+            std::string result = _func(buffer, peer);
+
+            sendto(_sockfd, result.c_str(), result.size(), 0, (struct sockaddr *)&peer, len);
         }
     }
     ~UdpServer()
@@ -81,8 +95,9 @@ public:
 
 private:
     uint16_t _port;
-    std::string _ip; // 点分十进制
+    // std::string _ip; // 点分十进制
     size_t _sockfd;
     
     bool _running;
+    func_t _func;
 };

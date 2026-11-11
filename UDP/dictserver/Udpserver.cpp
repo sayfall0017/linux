@@ -19,8 +19,9 @@ int main(int argc, char *argv[])
     Dict dict;
     dict.LoadDict();
 
-    std::unique_ptr<UdpServer> usvr = std::make_unique<UdpServer>(port, [&dict](const std::string &word, InetAddr &client)
-                                                                  { return dict.Translate(word, client); });
+    std::unique_ptr<UdpServer>
+        usvr = std::make_unique<UdpServer>(port, [&dict](const std::string &word, InetAddr &client)
+                                           { return dict.Translate(word, client); });
     usvr->Init();
     usvr->Strat();
     return 0;

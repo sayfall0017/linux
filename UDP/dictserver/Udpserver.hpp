@@ -7,7 +7,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <sys/un.h>
 #include <functional>
 #include "Inetaddr.hpp"
 #include "Log.hpp"
@@ -38,16 +37,10 @@ public:
 
         // 2.bind
         // 填写结构体
-        struct sockaddr_in local;
-        bzero(&local, sizeof(local));
-        local.sin_port = htons(_port);
-        // local.sin_addr.s_addr = inet_addr(_ip.c_str());//TODO
-        local.sin_addr.s_addr = INADDR_ANY;
-        local.sin_family = AF_INET;
+        InetAddr local(_port);
 
         // bind
-        int n = bind(_sockfd, (struct sockaddr *)&local, sizeof(local));
-        // 绑定问题->ip问题
+        int n = bind(_sockfd, CONV(local), local.NetAddrLen());
         if(n < 0)
         {
             LOG(LogLevel::FATAL) << "bind fail";
@@ -79,15 +72,11 @@ public:
             buffer[s] = 0;
 
 
-            // LOG(LogLevel::DEBUG) << "[" << peer_ip << ":" << peer_port << "]" << buffer;
-            // 发消息
-            // std::string echo_string = "server echo@";
-            // echo_string += buffer;
-
             // 添加函数对象让功能和网络服务器发送分开
             InetAddr client(peer);
             std::string result = _func(buffer, client);
 
+            // 发消息
             sendto(_sockfd, result.c_str(), result.size(), 0, (struct sockaddr *)&peer, len);
         }
     }
@@ -97,7 +86,6 @@ public:
 
 private:
     uint16_t _port;
-    // std::string _ip; // 点分十进制
     size_t _sockfd;
     
     bool _running;

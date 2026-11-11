@@ -40,10 +40,10 @@ public:
                 continue;
             }
             _dict.insert(std::make_pair(english, chinese));
-            LOG(LogLevel::DEBUG) << "加载" << line << " 继续...";
+            LOG(LogLevel::DEBUG) << "加载成功： " << line;
         }
 
-        LOG(LogLevel::DEBUG) << "配置完成！";
+        LOG(LogLevel::INFO) << "配置完成！";
         in.close();
         return true;
     }
@@ -58,7 +58,7 @@ public:
             std::string result = word + "不存在";
             return result;
         }
-        LOG(LogLevel::DEBUG) << "进入到了翻译模块, [" << client.Ip() << " : " << client.Port() << "]# " << word << iter->second;
+        LOG(LogLevel::INFO) << "进入到了翻译模块, [" << client.Ip() << " : " << client.Port() << "]# " << word << iter->second;
         return iter->second;
     }
 

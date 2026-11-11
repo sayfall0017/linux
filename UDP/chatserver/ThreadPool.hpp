@@ -2,15 +2,10 @@
 #include <string>
 #include <vector>
 #include <queue>
-#include "Task.hpp"
 #include "Mutex.hpp"
 #include "Log.hpp"
-#include "Cond.hpp"
-#include "Thread.hpp"
 
 using namespace LogModule;
-using namespace CondModule;
-using namespace ThreadModule;
 using namespace MutexModule;
 
 namespace ThreadPoolModule
