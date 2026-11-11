@@ -27,7 +27,7 @@ public:
     {
         // 1.打开套接字（网络文件）
         size_t sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-        if(sockfd == 0)
+        if(sockfd < 0)
         {
             LOG(LogLevel::FATAL) << "socket fail";
             exit(1);
