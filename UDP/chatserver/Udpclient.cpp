@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     while(true)
     {
         std::string input;
-        std::cout << "Please Enter# ";
+        std::cerr << "Please Enter# ";
         getline(std::cin, input);
         // 发消息
         int n = sendto(sockfd, input.c_str(), input.size(), 0, (sockaddr *)&server, sizeof(server));

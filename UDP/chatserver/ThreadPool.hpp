@@ -1,15 +1,21 @@
+#pragma once
 #include <iostream>
 #include <string>
 #include <vector>
 #include <queue>
-#include "Mutex.hpp"
 #include "Log.hpp"
+#include "Thread.hpp"
+#include "Cond.hpp"
+#include "Mutex.hpp"
 
-using namespace LogModule;
-using namespace MutexModule;
+// .hpp header only
 
 namespace ThreadPoolModule
 {
+    using namespace ThreadModule;
+    using namespace LogModule;
+    using namespace CondModule;
+    using namespace MutexModule;
 
     static const int gnum = 5;
     template <typename T>
@@ -30,8 +36,7 @@ namespace ThreadPoolModule
             LOG(LogLevel::INFO) << "唤醒一个休眠线程";
         }
 
-        ThreadPool(int num = gnum, bool isrunning = false, int sleepernum = 0)
-            : _num(num), _isrunning(isrunning), _sleepernum(sleepernum)
+        ThreadPool(int num = gnum) : _num(num), _isrunning(false), _sleepernum(0)
         {
             for (int i = 0; i < num; i++)
             {
@@ -42,44 +47,39 @@ namespace ThreadPoolModule
                     });
             }
         }
-
-        bool Start()
+        void Start()
         {
-            if (_isrunning == true)
-            {
-                return true;
-            }
+            if (_isrunning)
+                return;
             _isrunning = true;
-            for (auto &thread : _threads) // 为什么用引用 》 不可拷贝
+            for (auto &thread : _threads)
             {
                 thread.Start();
-                LOG(LogLevel::INFO) << "start new thread success:" << thread.Getname();
+                // LOG(LogLevel::INFO) << "start new thread success: " << thread.Name();
             }
-            return true;
         }
 
-        ThreadPool(const ThreadPool<T> &) = delete; // 单例模式 拷贝构造和赋值重载都不能用
+        ThreadPool(const ThreadPool<T> &) = delete;
         ThreadPool<T> &operator=(const ThreadPool<T> &) = delete;
 
     public:
-        // 获取单例
-        static ThreadPool<T> *Getinstance() // 静态成员函数 调用时候还不一定有ThreadPool对象
+        static ThreadPool<T> *GetInstance()
         {
-            if (_inc == nullptr)
+            if (inc == nullptr)
             {
                 LockGuard lockguard(_lock);
 
-                LOG(LogLevel::DEBUG) << "获取单例...";
-                if (_inc == nullptr)
+                LOG(LogLevel::DEBUG) << "获取单例....";
+                if (inc == nullptr)
                 {
-                    LOG(LogLevel::DEBUG) << "首次适用单例，创建中...";
-                    _inc = new ThreadPool<T>();
-                    _inc->Start();
+                    LOG(LogLevel::DEBUG) << "首次使用单例, 创建之....";
+                    inc = new ThreadPool<T>();
+                    inc->Start();
                 }
             }
-            return _inc;
-        }
 
+            return inc;
+        }
         void Stop()
         {
             if (!_isrunning)
@@ -96,7 +96,6 @@ namespace ThreadPoolModule
                 thread.Join();
             }
         }
-
         void HandlerTask()
         {
             char name[128];
@@ -124,10 +123,9 @@ namespace ThreadPoolModule
                     t = _taskq.front(); // 从q中获取任务，任务已经是线程私有的了！！！
                     _taskq.pop();
                 }
-                t(); // 处理任务，不需要临界区内部处理
+                t(); // 处理任务，需/要在临界区内部处理吗？1 0
             }
         }
-
         bool Enqueue(const T &in)
         {
             if (_isrunning)
@@ -140,28 +138,29 @@ namespace ThreadPoolModule
             }
             return false;
         }
-
         ~ThreadPool()
         {
         }
 
     private:
         std::vector<Thread> _threads;
-        int _num;
+        int _num; // 线程池中，线程的个数
         std::queue<T> _taskq;
-        Mutex _mutex;
         Cond _cond;
+        Mutex _mutex;
 
         bool _isrunning;
         int _sleepernum;
 
-        static ThreadPool<T> *_inc;
+        // bug??
+        static ThreadPool<T> *inc; // 单例指针
         static Mutex _lock;
     };
 
     template <typename T>
-    ThreadPool<T> *ThreadPool<T>::_inc = nullptr;
+    ThreadPool<T> *ThreadPool<T>::inc = nullptr;
 
     template <typename T>
     Mutex ThreadPool<T>::_lock;
+
 }
