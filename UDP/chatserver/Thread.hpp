@@ -21,6 +21,7 @@ namespace ThreadModule
         {
             _isDetached = true;
         }
+
         static void *Routine(void *args) // 需要执行的操作是利用传入的this指针使用传入的函数
         {
             Thread *self = static_cast<Thread *>(args);
@@ -95,6 +96,11 @@ namespace ThreadModule
                 std::cout << "join回收成功" << std::endl;//
             else
                 std::cout << "join失败" << std::endl;
+        }
+
+        int Id()
+        {
+            return _tid;
         }
 
         ~Thread()
