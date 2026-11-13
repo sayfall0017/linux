@@ -34,28 +34,27 @@ private:
     // 广播消息
     void BroadCast(const size_t &socket, const std::string &message, InetAddr &peer)
     {
-        std::string send_message = peer.StringAddr() + " # " + message;
+        std::string send_message = peer.StringAddr() + " @ " + message;
         for (auto u : _users)
         {
-            sendto(socket, send_message.c_str(), sizeof(send_message), 0, CONV(peer), sizeof(peer));
+            sendto(socket, send_message.c_str(), send_message.size(), 0, CONV(u), sizeof(u));
         }
     }
 
-    //判断并退出
+    // 判断并退出
     void Quit(const std::string &message, InetAddr &peer)
     {
-        if(message == "QUIT")
+        if (message == "QUIT")
         {
             for (auto iter = _users.begin(); iter != _users.end(); iter++)
             {
                 if (peer == *iter)
-                    {
-                        _users.erase(iter);
-                        LOG(LogLevel::INFO) << "离线了一个用户：" << peer.StringAddr();
-                        break;
-                    }
+                {
+                    LOG(LogLevel::INFO) << "离线了一个用户：" << peer.StringAddr();
+                    _users.erase(iter);
+                    break;
+                }
             }
-            
         }
     }
 
