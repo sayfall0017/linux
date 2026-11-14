@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include "Inetaddr.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -27,19 +28,8 @@ int main(int argc, char *argv[])
     std::cout << "socket success" << std::endl;
 
     //  填写 sockaddr_in 结构体
-    struct sockaddr_in server;
-    memset(&server, 0, sizeof(server));
-    server.sin_family = AF_INET;
-    server.sin_addr.s_addr = inet_addr(server_ip.c_str());
-    server.sin_port = htons(server_port);
+    InetAddr server(server_ip, server_port);
 
-    // bind
-    // 说明一点：bind是bind自己的socket
-    // 那么这里需要bind吗？
-    // 必然是需要的，但是不需要显式bin
-    
-    // 首次发送消息，OS会自动给client进行bind，OS知道IP，端口号采用随机端口号的方式
-    // （client每次都是率先发消息的，所以只需要确保自己的socket信息能够发出即可，并不在乎是哪个ip和port → 客户端的端口“是几”根本不重要）
 
 
     while(true)
@@ -48,7 +38,7 @@ int main(int argc, char *argv[])
         std::cout << "Please Enter# ";
         getline(std::cin, input);
         // 发消息
-        int n = sendto(sockfd, input.c_str(), input.size(), 0, (sockaddr *)&server, sizeof(server));
+        int n = sendto(sockfd, input.c_str(), input.size(), 0, CONV(server), server.NetAddrLen());
         (void)n;
         // 收消息
         struct sockaddr_in peer;

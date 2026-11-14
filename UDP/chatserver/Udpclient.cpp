@@ -59,11 +59,11 @@ int main(int argc, char *argv[])
         std::cerr << "Usage: " << argv[0] << " server_ip server_port" << std::endl;
         return 1;
     }
-server_ip = argv[1];
-server_port = std::stoi(argv[2]);
+    server_ip = argv[1];
+    server_port = std::stoi(argv[2]);
 
     // 打开socket
-sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0)
     {
         std::cout << "socket error" << std::endl;
