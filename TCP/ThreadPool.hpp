@@ -152,7 +152,6 @@ namespace ThreadPoolModule
         bool _isrunning;
         int _sleepernum;
 
-        // bug??
         static ThreadPool<T> *inc; // 单例指针
         static Mutex _lock;
     };

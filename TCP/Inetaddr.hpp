@@ -8,7 +8,6 @@
 #include <netinet/in.h>
 // 网络地址和主机地址之间进行转换的类
 
-#define CONV(addr) ((struct sockaddr*)&addr)
 
 class InetAddr
 {
