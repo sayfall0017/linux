@@ -1,16 +1,35 @@
-#include <iostream>
-#include <string>
-#include <cstring>
-#include "Log.hpp"
-#include "Thread.hpp"
+
 #include "Common.hpp"
 
-int main(int argc, char *argv[])
+
+using namespace LogModule;
+using namespace ThreadModule;
+using namespace ThreadPoolModule;
+
+const int defaultsockfd = -1;
+
+using func_t = std::function<std::string(const std::string &, InetAddr &)>;
+
+class TcpServer : public NoCopy
 {
-    if(argc < 2)
+public:
+    TcpServer(const uint16_t port, func_t func) : _port(port), _listensocket(defaultsockfd), _running(false), _func(func)
     {
-        std::cout << "Usage:" << argv[0] << "ServerIp ServerPort" << std::endl;
-        exit(USAGE_ERR);
     }
-    return 0;
-}
+    void Init()
+    {
+    }
+    void Start()
+    {
+    }
+    ~TcpServer()
+    {
+    }
+
+private:
+    uint16_t _port;
+    int _listensocket;
+    bool _running;
+
+    func_t _func;
+};

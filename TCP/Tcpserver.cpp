@@ -1,15 +1,22 @@
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <iostream>
-#include <string>
-#include <cstring>
-#include "Log.hpp"
-#include "Thread.hpp"
-#include "ThreadPool.hpp"
+#include "Common.hpp"
+#include "Tcpserver.hpp"
+#include "Dict.hpp"
 
-using namespace LogModule;
-using namespace ThreadModule;
-using namespace ThreadPoolModule;
+int main(int argc, char *argv[])
+{
+    if(argc < 2)
+    {
+        std::cout << "Usage:" << argv[0] << "ServerIp ServerPort" << std::endl;
+        exit(USAGE_ERR);
+    }
+    std::string Port = argv[1];
 
+    Dict dict;
+    dict.LoadDict();
+
+    std::unique_ptr<TcpServer> tsvr = std::make_unique<TcpServer>(Port, [&dict](const std::string &word, InetAddr &client)
+                                                       {
+                                                           return dict.Translate(word, client);
+                                                       });
+    return 0;
+}
