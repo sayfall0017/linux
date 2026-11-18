@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include "Common.hpp"
 // 网络地址和主机地址之间进行转换的类
 
 

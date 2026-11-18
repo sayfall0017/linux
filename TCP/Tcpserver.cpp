@@ -1,6 +1,7 @@
 #include "Common.hpp"
 #include "Tcpserver.hpp"
 #include "Dict.hpp"
+#include "Inetaddr.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -18,5 +19,7 @@ int main(int argc, char *argv[])
                                                        {
                                                            return dict.Translate(word, client);
                                                        });
+    tsvr->Init();
+    tsvr->Run();
     return 0;
 }

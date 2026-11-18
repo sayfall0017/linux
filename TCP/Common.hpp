@@ -12,7 +12,6 @@
 #include "Log.hpp"
 #include "Thread.hpp"
 #include "ThreadPool.hpp"
-#include "Inetaddr.hpp"
 
 enum ExitCode
 {
